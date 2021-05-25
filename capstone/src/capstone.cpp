@@ -2,8 +2,25 @@
 
 void Capstone::initSetup() {
 	scan_sub_ = nh_.subscribe("/raw_obstacles", 10, &Capstone::scanCallback, this);
+	imu_sub_ = nh_.subscribe("/imu/data", 10, &Capstone::imuCallback, this);
 	marker_pub_ = nh_.advertise<visualization_msgs::Marker>("waypoint", 10);
 	cmd_pub_ = nh_.advertise<geometry_msgs::Twist>("cmd", 10);
+}
+
+void Capstone::imuCallback(const sensor_msgs::ImuConstPtr &data){
+	double roll, pitch, yaw = 0;
+	
+	tf::Quaternion q(
+			data->orientation.x,
+			data->orientation.y,
+			data->orientation.z,
+			data->orientation.w);
+	tf::Matrix3x3 m(q);
+	m.getRPY(roll, pitch, yaw);
+
+	yaw_ =  yaw * 180 / M_PI;
+	
+	cout << yaw_ << endl;
 }
 
 void Capstone::scanCallback(const obstacle_detector::Obstacles obs){
@@ -20,7 +37,7 @@ void Capstone::scanCallback(const obstacle_detector::Obstacles obs){
 	points.type = visualization_msgs::Marker::POINTS;
 	points.scale.x = 0.1; 
 	points.scale.y = 0.1;
-	points.color.a = 1.0;:wq
+	points.color.a = 1.0;
 
 	points.color.b = 1.0f;
 
@@ -32,6 +49,9 @@ void Capstone::scanCallback(const obstacle_detector::Obstacles obs){
 	points.points.push_back(p);
 
 	marker_pub_.publish(points);
+	cmd_.linear.x = 100;
+	cmd_.angular.z = 90 - calcAngle(point);
+	cmd_pub_.publish(cmd_);
 }
 
 geometry_msgs::Point Capstone::checkObstacle(const obstacle_detector::Obstacles obs){
@@ -45,12 +65,12 @@ geometry_msgs::Point Capstone::checkObstacle(const obstacle_detector::Obstacles 
 
 	point.x = point.x/obs.segments.size();
 	point.y = point.y/obs.segments.size();
-
+	
 	return point;
 }
 
 double Capstone::calcAngle(geometry_msgs::Point point) {
-	return 
+	return atan2(point.y, point.x) * 180 / M_PI; 
 }
 
 int main(int argc, char **argv) {

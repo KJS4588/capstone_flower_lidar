@@ -7,8 +7,8 @@
 #define STEER_MAX 1700 // +90 deg
 
 #define SPEED_ZERO 1500
-#define SPEED_MIN 1200
-#define SPEED_MAX 1800
+#define SPEED_MIN 1250
+#define SPEED_MAX 1750
 
 Servo steer_servo;
 Servo dc_servo;
@@ -35,11 +35,11 @@ void setup() {
 
 void loop() {
   static float tx_steer_;
-  /*if(Serial.available() > 0) { // tx_throttle_
+  if(Serial.available() > 0) { // tx_throttle_
     tx_steer_ = Serial.parseFloat();
     Serial.println(tx_steer_);
-    dc_servo.writeMicroseconds(tx_steer_);
-    }*/
+    steer_servo.writeMicroseconds(tx_steer_);
+    }
   nh_.spinOnce();
   delay(100);
 }
