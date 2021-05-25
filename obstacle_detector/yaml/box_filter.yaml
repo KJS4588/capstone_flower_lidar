@@ -1,0 +1,32 @@
+scan_filter_chain:
+- name: box_filter
+  type: laser_filters/LaserScanBoxFilter
+  params:
+    box_frame: laser
+    max_x: 1.0
+    max_y: 0.6
+    max_z: 0.3
+    min_x: -100.0
+    min_y: -0.6
+    min_z: -1.0
+
+- name: rear_filter
+  type: laser_filters/LaserScanBoxFilter
+  params:
+    box_frame: laser
+    max_x: 0.0
+    max_y: .inf
+    max_z: 0.5
+    min_x: -.inf
+    min_y: -.inf
+    min_z: -1.0
+   
+- name: range
+  type: laser_filters/LaserScanRangeFilter
+  params:
+    box_frame: laser
+    use_message_range_limits: false
+    lower_threshold: 0.3
+    upper_threshold: 5.0
+    lower_replacement_value: .inf
+    upper_replacement_value: .inf
