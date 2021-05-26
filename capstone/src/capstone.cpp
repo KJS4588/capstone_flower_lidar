@@ -49,8 +49,10 @@ void Capstone::scanCallback(const obstacle_detector::Obstacles obs){
 	points.points.push_back(p);
 
 	marker_pub_.publish(points);
-	cmd_.linear.x = 100;
+	cmd_.linear.x = 95;
 	cmd_.angular.z = 90 - calcAngle(point);
+	if (cmd_.angular.z >=100) cmd_.angular.z = 100;
+	if (cmd_.angular.z <=80)  cmd_.angular.z = 80;
 	cmd_pub_.publish(cmd_);
 }
 

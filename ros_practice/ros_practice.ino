@@ -18,7 +18,7 @@ ros::NodeHandle nh_;
 void cmd_cb(const geometry_msgs::Twist& cmd) {
 
   dc_servo.write(cmd.linear.x);
-  steer_servo.write(cmd.angular.z);
+  steer_servo.writeMicroseconds(cmd.angular.z);
   printf("1");
 }
 
@@ -34,12 +34,12 @@ void setup() {
 }
 
 void loop() {
-  static float tx_steer_;
+  /*static float tx_steer_;
   if(Serial.available() > 0) { // tx_throttle_
     tx_steer_ = Serial.parseFloat();
     Serial.println(tx_steer_);
-    steer_servo.writeMicroseconds(tx_steer_);
-    }
+    dc_servo.writeMicroseconds(tx_steer_);
+    }*/
   nh_.spinOnce();
   delay(100);
 }

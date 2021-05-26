@@ -19,7 +19,8 @@ void Capstone::scanCallback(const sensor_msgs::LaserScan::ConstPtr &scan){
 			scan_data_[count] = scan->ranges[i]>8||scan->ranges[i]<1 ? THE : scan->ranges[i]*scan->ranges[i];
 			count++;
 		}
-	} 	
+	} 
+
 	for (int i=0;i<18;i++) {
 		right_temp_ += scan_data_[i];
 	}	
