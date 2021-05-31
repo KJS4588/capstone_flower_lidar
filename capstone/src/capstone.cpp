@@ -50,6 +50,8 @@ void Capstone::scanCallback(const obstacle_detector::Obstacles obs){
 
 	marker_pub_.publish(points);
 	cmd_.linear.x = 95;
+
+	cout << 90 - calcAngle(point) << endl;
 	cmd_.angular.z = (90 - calcAngle(point)) * 1500/90;
 	if (cmd_.angular.z >=1700) cmd_.angular.z = 1700;
 	if (cmd_.angular.z <=1300)  cmd_.angular.z = 1300;
@@ -78,6 +80,7 @@ double Capstone::calcAngle(geometry_msgs::Point point) {
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "capstone_node");
 	Capstone ct;
+	ct.initSetup();
 	ros::spin();
 	return 0;
 }

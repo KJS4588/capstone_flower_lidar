@@ -14,6 +14,7 @@
 
 #define WHEEL_BASE 0.25 // cm
 #define LD         1    // m
+#define WIDTH      2.1  // m
 #define THE        numeric_limits<float>::infinity()
 #define _USE_MATH_DEFINES
 
@@ -36,12 +37,10 @@ private:
 	int count_;
 	geometry_msgs::Twist cmd_;
 public:
-	Capstone() { initSetup(); }
-	~Capstone() {}
 
 	void initSetup();
-	void scanCallback(const sensor_msgs::LaserScan::ConstPtr &scan);
-//	void scanCallback(const obstacle_detector::Obstacles obs);
+//	void scanCallback(const sensor_msgs::LaserScan::ConstPtr &scan);
+	void scanCallback(const obstacle_detector::Obstacles obs);
 //	void imuCallback(const sensor_msgs::ImuConstPtr &data);
 	
 	geometry_msgs::Point checkObstacle(const obstacle_detector::Obstacles obs);

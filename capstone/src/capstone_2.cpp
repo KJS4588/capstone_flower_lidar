@@ -27,26 +27,42 @@ void Capstone::scanCallback(const sensor_msgs::LaserScan::ConstPtr &scan){
 		if (scan_data_[i] > 8) idx_.push_back(i);
 	}
 
-	for (size_t i=0;i<idx_.size();i++) sum += idx_.at(i);
-	sum = sum / idx_.size() * 5;
-	
-	cout << sum << endl;
+	if (idx_.size() != 0) {
+		left_temp_ = idx_.at(idx_.size()-1);
+		right_temp_ = idx_.at(0);
 
-	angle_ = 200/13*(sum - 90) + 1500;
+		left_temp_ = 18 - left_temp_;
+		right_temp_ = 18 - right_temp_;
+		
+		if (abs(left_temp_) == abs(right_temp_)) angle_ = 1500;
+		else {
+			sum = abs(left_temp_) > abs(right_temp_) ? (left_temp_) * 5 : (right_temp_) * 5;
+		}
 
-	if (angle_ < 1300) angle_ = 1300;
-	if (angle_ > 1700) angle_ = 1700;
-	
+		angle_ = 200/13*sum + 1500;
+	} else {
+	}
+
+	if (angle_ < 1350) angle_ = 1350;
+	if (angle_ > 1650) angle_ = 1650;
+
+
 	cmd_.angular.z = angle_;
 	cmd_.linear.x = 95;
 	
 	cmd_pub_.publish(cmd_);
-	
+	idx_.clear();
+	/*
+	cout << "sum       : " << sum << endl;
+	cout << "angle     : " << angle_ << endl;
+	cout << "angular_z : " << cmd_.angular.z << endl;
+*/
 }
 
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "Capstone_node2");
 	Capstone ct;
+	ct.initSetup();
 	ros::spin();
 	return 0;
 }
