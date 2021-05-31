@@ -2,11 +2,11 @@
 
 void Capstone::initSetup() {
 	scan_sub_ = nh_.subscribe("/raw_obstacles", 10, &Capstone::scanCallback, this);
-	imu_sub_ = nh_.subscribe("/imu/data", 10, &Capstone::imuCallback, this);
+//	imu_sub_ = nh_.subscribe("/imu/data", 10, &Capstone::imuCallback, this);
 	marker_pub_ = nh_.advertise<visualization_msgs::Marker>("waypoint", 10);
 	cmd_pub_ = nh_.advertise<geometry_msgs::Twist>("cmd", 10);
 }
-
+/*
 void Capstone::imuCallback(const sensor_msgs::ImuConstPtr &data){
 	double roll, pitch, yaw = 0;
 	
@@ -21,7 +21,7 @@ void Capstone::imuCallback(const sensor_msgs::ImuConstPtr &data){
 	yaw_ =  yaw * 180 / M_PI;
 	
 	cout << yaw_ << endl;
-}
+}*/
 
 void Capstone::scanCallback(const obstacle_detector::Obstacles obs){
 	geometry_msgs::Point point = checkObstacle(obs);
@@ -50,9 +50,9 @@ void Capstone::scanCallback(const obstacle_detector::Obstacles obs){
 
 	marker_pub_.publish(points);
 	cmd_.linear.x = 95;
-	cmd_.angular.z = 90 - calcAngle(point);
-	if (cmd_.angular.z >=100) cmd_.angular.z = 100;
-	if (cmd_.angular.z <=80)  cmd_.angular.z = 80;
+	cmd_.angular.z = (90 - calcAngle(point)) * 1500/90;
+	if (cmd_.angular.z >=1700) cmd_.angular.z = 1700;
+	if (cmd_.angular.z <=1300)  cmd_.angular.z = 1300;
 	cmd_pub_.publish(cmd_);
 }
 

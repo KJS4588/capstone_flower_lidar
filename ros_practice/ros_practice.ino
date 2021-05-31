@@ -3,8 +3,8 @@
 #include <ros.h>
 #include <geometry_msgs/Twist.h>
 #define STEER_CENTER 1500 // 0 deg
-#define STEER_MIN 1300 // -90 deg 
-#define STEER_MAX 1700 // +90 deg
+#define STEER_MIN 1300 // -13 deg 
+#define STEER_MAX 1700 // +13 deg
 
 #define SPEED_ZERO 1500
 #define SPEED_MIN 1250
@@ -38,7 +38,7 @@ void loop() {
   if(Serial.available() > 0) { // tx_throttle_
     tx_steer_ = Serial.parseFloat();
     Serial.println(tx_steer_);
-    dc_servo.writeMicroseconds(tx_steer_);
+    steer_servo.writeMicroseconds(tx_steer_);
     }*/
   nh_.spinOnce();
   delay(100);

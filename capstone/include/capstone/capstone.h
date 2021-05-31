@@ -39,9 +39,9 @@ public:
 	~Capstone() {}
 
 	void initSetup();
-	void scanCallback(const sensor_msgs::LaserScan::ConstPtr &scan);
-	//void scanCallback(const obstacle_detector::Obstacles obs);
-	void imuCallback(const sensor_msgs::ImuConstPtr &data);
+//	void scanCallback(const sensor_msgs::LaserScan::ConstPtr &scan);
+	void scanCallback(const obstacle_detector::Obstacles obs);
+//	void imuCallback(const sensor_msgs::ImuConstPtr &data);
 	
 	geometry_msgs::Point checkObstacle(const obstacle_detector::Obstacles obs);
 	
