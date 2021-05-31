@@ -14,7 +14,7 @@
 
 #define WHEEL_BASE 0.25 // cm
 #define LD         1    // m
-#define THE        10
+#define THE        numeric_limits<float>::infinity()
 #define _USE_MATH_DEFINES
 
 using namespace std;
@@ -26,12 +26,13 @@ private:
 	ros::Publisher cmd_pub_, marker_pub_;
 
 	vector<geometry_msgs::Point> obs_;
+	vector<int> idx_;
 	float scan_data_[36] = {0};	
 	
 	double angle_, pre_angle_; //degree
 	double gap_, pre_gap_;               //between left & right
 	double yaw_, left_temp_, right_temp_;
-	
+		
 	int count_;
 	geometry_msgs::Twist cmd_;
 public:
@@ -39,8 +40,8 @@ public:
 	~Capstone() {}
 
 	void initSetup();
-//	void scanCallback(const sensor_msgs::LaserScan::ConstPtr &scan);
-	void scanCallback(const obstacle_detector::Obstacles obs);
+	void scanCallback(const sensor_msgs::LaserScan::ConstPtr &scan);
+//	void scanCallback(const obstacle_detector::Obstacles obs);
 //	void imuCallback(const sensor_msgs::ImuConstPtr &data);
 	
 	geometry_msgs::Point checkObstacle(const obstacle_detector::Obstacles obs);
