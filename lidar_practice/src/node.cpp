@@ -23,22 +23,63 @@ const double ACCEATABLE_ERROR = 0.01;
 ros::Publisher pub, pub2;
 float scan_data_[36] = {0};
 
+double calcDist(pcl::PointXYZ p1, pcl::PointXYZ p2) {
+    double x = p1.x - p2.x;
+    double y = p1.y - p2.y;
+    
+    return sqrt(x*x + y*y);
+}
+
 void scanCallback(const sensor_msgs::PointCloud2::ConstPtr &msg){
+    double ex_dist = 0.0;
+    double dist = 0.0;
+    
+    bool cnt = false;
+
+    pcl::PointXYZ ex_point;
+
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::fromROSMsg(*msg, *cloud);
 	cloud->header.frame_id = "laser";
 	
 	vector<pcl::PointXYZ> left_point, right_point;
+    
+	
+    for (size_t i=0;i<cloud->points.size();i++) {
+        if (!cnt) {
+            if (cloud->points.at(i).x <= 6) {
+                    if (cloud->points.at(i).y < 0) {
+                    right_point.push_back(cloud->points.at(i));
+                }else if (cloud->points.at(i).y > 0) {
+                    left_point.push_back(cloud->points.at(i));
+                }
+                cnt = true;
+            }
+        } else {
+            dist = calcDist(cloud->points.at(i), ex_point);
+            if (cloud->points.at(i).x <= 6 && dist < 0.01) {
+                    if (cloud->points.at(i).y < 0) {
+                    right_point.push_back(cloud->points.at(i));
+                }else if (cloud->points.at(i).y > 0) {
+                    left_point.push_back(cloud->points.at(i));
+                }
+            }
+        }
+        ex_point = cloud->points.at(i);
+    }
 
-	for (size_t i=0;i<cloud->points.size();i++) {
-		if (cloud->points.at(i).x <= 6) {
-			if (cloud->points.at(i).y < 0) {
-				right_point.push_back(cloud->points.at(i));
-			} else if (cloud->points.at(i).y > 0) {
-				left_point.push_back(cloud->points.at(i));
-			}		
-		}
-	}
+    for (size_t i=0;i<cloud->points.size();i++) {
+        if (!cnt) {
+            left_point.push_back(cloud->points.at(i));
+            cnt = true;
+        }else {
+            
+        }
+        
+
+    }
+
+
 	double left_coef[ORDER+1];
 	double right_coef[ORDER+1];
 
