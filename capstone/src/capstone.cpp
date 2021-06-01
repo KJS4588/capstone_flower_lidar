@@ -1,11 +1,38 @@
 #include "capstone/capstone.h"
 
 void Capstone::initSetup() {
-	scan_sub_ = nh_.subscribe("/raw_obstacles", 10, &Capstone::scanCallback, this);
+//	scan_sub_ = nh_.subscribe("/raw_obstacles", 10, &Capstone::scanCallback, this);
 //	imu_sub_ = nh_.subscribe("/imu/data", 10, &Capstone::imuCallback, this);
+	coef_sub_ = nh_.subscribe("/coef", 10, &Capstone::wayCallback, this);
 	marker_pub_ = nh_.advertise<visualization_msgs::Marker>("waypoint", 10);
 	cmd_pub_ = nh_.advertise<geometry_msgs::Twist>("cmd", 10);
+
+	alpha_ = 0.0;
+	yaw_ = 0.0;
+	des_angle_ = 0.0;
+
 }
+
+void Capstone::wayCallback(const std_msgs::Float32MultiArray::ConstPtr &coef) {
+	double way_coef[3] = {0};
+
+	for (int i=0;i<3;i++) {
+		way_coef[i] = coef->data[i];
+	}	
+	goal_point_ = makeGoalpoint(way_coef);
+	alpha_ = calcAngle(goal_point_);
+	angle_ = calcSteeringAngle(abs(alpha_)) * 180 / M_PI;
+
+	if (alpha_ > 0) angle_ = -angle_;
+	
+	cmd_.linear.x = 95;
+	cmd_.angular.z = angle_ * 150/13 + 1500;
+	
+	cout << endl << "angle : " << angle_ << endl;
+	cout << "cmd   : " << cmd_.angular.z << endl << endl;	
+	cmd_pub_.publish(cmd_);
+}
+
 /*
 void Capstone::imuCallback(const sensor_msgs::ImuConstPtr &data){
 	double roll, pitch, yaw = 0;
@@ -23,6 +50,9 @@ void Capstone::imuCallback(const sensor_msgs::ImuConstPtr &data){
 	cout << yaw_ << endl;
 }*/
 
+
+
+/*
 void Capstone::scanCallback(const obstacle_detector::Obstacles obs){
 	geometry_msgs::Point point = checkObstacle(obs);
 
@@ -71,10 +101,23 @@ geometry_msgs::Point Capstone::checkObstacle(const obstacle_detector::Obstacles 
 	point.y = point.y/obs.segments.size();
 	
 	return point;
+}*/
+
+
+double Capstone::calcSteeringAngle(double alpha) {
+	return atan2(2*WHEEL_BASE*sin(alpha), LD);
+}
+double Capstone::calcAngle(geometry_msgs::Point point) {
+	return atan2(point.y, point.x); 
 }
 
-double Capstone::calcAngle(geometry_msgs::Point point) {
-	return atan2(point.y, point.x) * 180 / M_PI; 
+geometry_msgs::Point Capstone::makeGoalpoint(double coef[3]) {
+	geometry_msgs::Point p;
+	p.y = coef[2]*LD*LD + coef[1]*LD + coef[0];
+	p.x = LD;
+	p.z = 0;
+
+	return p;
 }
 
 int main(int argc, char **argv) {
