@@ -14,7 +14,7 @@
 #include "cmath"
 
 #define WHEEL_BASE 0.25 // cm
-#define LD         2    // m
+#define LD         1.0    // m
 #define WIDTH      2.1  // m
 #define THE        numeric_limits<float>::infinity()
 #define _USE_MATH_DEFINES

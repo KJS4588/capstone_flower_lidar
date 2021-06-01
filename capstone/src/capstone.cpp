@@ -25,8 +25,10 @@ void Capstone::wayCallback(const std_msgs::Float32MultiArray::ConstPtr &coef) {
 
 	if (alpha_ > 0) angle_ = -angle_;
 	
-	cmd_.linear.x = 95;
-	cmd_.angular.z = angle_ * 150/13 + 1500;
+	cmd_.linear.x = 100;
+	cmd_.angular.z = angle_ * 150/20 + 1500;
+	if (cmd_.angular.z < 1350) cmd_.angular.z = 1350;
+	if (cmd_.angular.z > 1750) cmd_.angular.z = 1750;
 	
 	cout << endl << "angle : " << angle_ << endl;
 	cout << "cmd   : " << cmd_.angular.z << endl << endl;	
