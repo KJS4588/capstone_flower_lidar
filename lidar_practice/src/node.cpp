@@ -7,11 +7,13 @@
 #include "pcl_conversions/pcl_conversions.h"
 #include "pcl_ros/point_cloud.h"
 #include "pcl_ros/transforms.h"
+
 #include "pcl/point_types.h"
 #include "pcl/io/pcd_io.h"
 #include "pcl/point_cloud.h"
-#include "std_msgs/Float32MultiArray.h"
+#include "pcl/segmentation/extract_clusters.h"
 
+#include "std_msgs/Float32MultiArray.h"
 #include "vector"
 #include "cmath"
 
@@ -25,7 +27,7 @@ using namespace std;
 const unsigned int ORDER = 2;
 const double ACCEATABLE_ERROR = 0.01;
 
-ros::Publisher pub, pub2, marker_pub, coef_pub;
+ros::Publisher pub, pub2, marker_pub, coef_pub, left_pub, right_pub;
 pcl::PointXYZ ex_point;
 float scan_data_[36] = {0};
 
@@ -59,7 +61,7 @@ void visualize(double coef[ORDER+1]) {
 
 	geometry_msgs::Point p;
 
-	for (double i=1.5;i<5;i++) {
+	for (double i=0;i<5;i+=0.5) {
 		p.y = coef[2]*i*i + coef[1]*i + coef[0];
         //coef[3]*i*i*i + coef[2]*i*i + coef[1]*i + coef[0];
 		p.x = i;
@@ -84,6 +86,38 @@ void scanCallback(const sensor_msgs::PointCloud2::ConstPtr &msg){
 	cloud->header.frame_id = "laser";
 	
 	vector<pcl::PointXYZ> left_point, right_point;
+
+    pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
+    kdtree->setInputCloud(cloud);
+
+    vector<pcl::PointIndices> clusterIndices;
+    pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
+
+    ec.setClusterTolerance(0.7); // set distance threshold = 1.5m
+    // size < min_value -> noise -> not cluster
+    ec.setMinClusterSize(4);    // set Minimum Cluster Size
+    ec.setMaxClusterSize(10000); // set Maximum Cluster Size
+
+    ec.setSearchMethod(kdtree);
+    ec.setInputCloud(cloud);
+
+    ec.extract(clusterIndices);
+    int cluster_idx = 0;
+
+    for (vector<pcl::PointIndices>::const_iterator it=clusterIndices.begin();it!=clusterIndices.end();++it) {
+        if (it==clusterIndices.begin()) {
+            for (vector<int>::const_iterator pit=it->indices.begin();pit!=it->indices.end();++pit) {
+                left_point.push_back(cloud->points.at(*pit));
+            }
+        }
+        if (it==clusterIndices.begin()+1) {
+            for (vector<int>::const_iterator pit=it->indices.begin();pit!=it->indices.end();++pit) {
+                right_point.push_back(cloud->points.at(*pit));
+            }
+        }
+    }
+
+    /*
     pcl::PointXYZ tmp_p(0,0,0);
     int left_cnt = 0;
     int right_cnt = 0;
@@ -111,27 +145,40 @@ void scanCallback(const sensor_msgs::PointCloud2::ConstPtr &msg){
                 }
             }
         }
-    } 
+    } */
     
     cout << right_point.size() << " " << left_point.size() << endl;
-    int idx = right_point.size() > left_point.size() ? left_point.size() : right_point.size();
-    pcl::PointCloud<pcl::PointXYZ> waypoint_;
+
+    pcl::PointCloud<pcl::PointXYZ> left_seg, right_seg;
     pcl::PointXYZ p;
-    for (size_t i=0;i<idx;i++) {
-        p.x = (left_point.at(i).x + right_point.at(i).x)/2;
-        p.y = (left_point.at(i).y + right_point.at(i).y)/2;
+
+    for (size_t i=0;i<left_point.size();i++) {
+        p.x = left_point.at(i).x;
+        p.y = left_point.at(i).y;
         
         p.z = 0;        
-        waypoint_.push_back(p);
-    }  
+        left_seg.push_back(p);
+    } 
+    for (size_t i=0;i<right_point.size();i++) {
+        p.x = right_point.at(i).x;
+        p.y = right_point.at(i).y;
+        
+        p.z = 0;        
+        right_seg.push_back(p);
+    }   
 
-    pcl::PCLPointCloud2 cloud_p;
-    pcl::toPCLPointCloud2(waypoint_, cloud_p);
-    
-    sensor_msgs::PointCloud2 waypoint_pcl;
-    pcl_conversions::fromPCL(cloud_p, waypoint_pcl);
-    waypoint_pcl.header.frame_id = "laser";
-    pub.publish(waypoint_pcl);
+    pcl::PCLPointCloud2 cloud_left, cloud_right;
+    sensor_msgs::PointCloud2 left_pcl, right_pcl;
+
+    pcl::toPCLPointCloud2(left_seg, cloud_left);
+    pcl_conversions::fromPCL(cloud_left, left_pcl);
+    left_pcl.header.frame_id = "laser";
+    left_pub.publish(left_pcl);
+
+    pcl::toPCLPointCloud2(right_seg, cloud_right);
+    pcl_conversions::fromPCL(cloud_right, right_pcl);
+    right_pcl.header.frame_id = "laser";
+    right_pub.publish(right_pcl);
 
 	double left_coef[ORDER+1];
 	double right_coef[ORDER+1];
@@ -176,8 +223,10 @@ void scanCallback(const sensor_msgs::PointCloud2::ConstPtr &msg){
 int main(int argc, char** argv) {
 	ros::init(argc, argv, "lidar_node");	
 	ros::NodeHandle nh;
-	pub = nh.advertise<sensor_msgs::PointCloud2>("waypoint_mean", 10);	
-	coef_pub = nh.advertise<std_msgs::Float32MultiArray>("coef", 10);
+	left_pub = nh.advertise<sensor_msgs::PointCloud2>("/cluster1", 10);	
+	right_pub = nh.advertise<sensor_msgs::PointCloud2>("/cluster2", 10);	
+
+	coef_pub = nh.advertise<std_msgs::Float32MultiArray>("/coef", 10);
     marker_pub = nh.advertise<visualization_msgs::Marker>("/waypoint", 10);
 	ros::Subscriber sub = nh.subscribe("cloud", 10, scanCallback);
 
