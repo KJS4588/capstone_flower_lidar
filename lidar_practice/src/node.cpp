@@ -12,7 +12,7 @@
 #include "pcl/io/pcd_io.h"
 #include "pcl/point_cloud.h"
 #include "pcl/segmentation/extract_clusters.h"
-
+#include "pcl/filters/passthrough.h"
 #include "std_msgs/Float32MultiArray.h"
 #include "vector"
 #include "cmath"
@@ -86,6 +86,13 @@ void scanCallback(const sensor_msgs::PointCloud2::ConstPtr &msg){
 	cloud->header.frame_id = "laser";
 	
 	vector<pcl::PointXYZ> left_point, right_point;
+	pcl::PassThrough<pcl::PointXYZ> pass;
+	
+	pass.setInputCloud(cloud);
+	pass.setFilterFieldName("y");
+	pass.setFilterLimits(-10, 2.3);
+	pass.filter(*cloud);
+
 
     pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
     kdtree->setInputCloud(cloud);
