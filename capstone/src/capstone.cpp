@@ -120,9 +120,15 @@ double Capstone::calcAngle(geometry_msgs::Point point) {
 
 geometry_msgs::Point Capstone::makeGoalpoint(double coef[ORDER+1]) {
 	geometry_msgs::Point p;
-	p.y = coef[3]*LD*LD + coef[2]*LD*LD + coef[1]*LD + coef[0];
-	p.x = LD;
-	p.z = 0;
+	if (!intersection_) {
+		p.y = coef[3]*LD*LD*LD + coef[2]*LD*LD + coef[1]*LD + coef[0];
+		p.x = LD;
+		p.z = 0;
+	}else {
+		p.y = coef[3]*S_LD*S_LD*S_LD + coef[2]*S_LD*S_LD + coef[1]*S_LD + coef[0];
+		p.x = S_LD;
+		p.z = 0;
+	}
 
 	return p;
 }

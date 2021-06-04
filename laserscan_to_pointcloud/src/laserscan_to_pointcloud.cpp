@@ -76,7 +76,7 @@ void Converter::scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg) {
 			scan.intensities.push_back(0);
 		}
 		for (int i=75;i<=285;i++){
-			float msg_data = msg->ranges[i]>2||msg->ranges[i]<0 ? numeric_limits<float>::infinity() : msg->ranges[i];
+			float msg_data = msg->ranges[i]>2.4||msg->ranges[i]<0 ? numeric_limits<float>::infinity() : msg->ranges[i];
 
 			scan.ranges.push_back(msg_data);
 			scan.intensities.push_back(msg->intensities[i]);
