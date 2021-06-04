@@ -25,7 +25,6 @@
 using namespace std;
 
 const unsigned int ORDER = 2;
-const double ACCEATABLE_ERROR = 0.01;
 
 ros::Publisher pub, pub2, marker_pub, coef_pub, left_pub, right_pub;
 pcl::PointXYZ ex_point;
@@ -62,12 +61,12 @@ void visualize(double coef[ORDER+1]) {
 	geometry_msgs::Point p;
 
 	for (double i=0;i<5;i+=0.5) {
-		p.y = coef[2]*i*i + coef[1]*i + coef[0];
-        //coef[3]*i*i*i + coef[2]*i*i + coef[1]*i + coef[0];
+		p.y = coef[3]*i*i*i + coef[2]*i*i + coef[1]*i + coef[0];
 		p.x = i;
 		p.z = 0;
 		points.points.push_back(p);
 	}
+
 
 	marker_pub.publish(points);
 
@@ -124,35 +123,6 @@ void scanCallback(const sensor_msgs::PointCloud2::ConstPtr &msg){
         }
     }
 
-    /*
-    pcl::PointXYZ tmp_p(0,0,0);
-    int left_cnt = 0;
-    int right_cnt = 0;
-    for (size_t i=0;i<cloud->points.size();i++) {
-        if (!cnt) {
-            double degree = atan2(cloud->points.at(i).y, cloud->points.at(i).x) * 180 / M_PI;
-            if (calcDist(cloud->points.at(i), tmp_p) < 6) {
-                left_point.push_back(cloud->points.at(i));
-                cnt = true;
-            }
-        } else {
-            if (cloud->points.at(i).x <= 6) {
-                dist1 = calcDist(cloud->points.at(i), left_point.at(left_point.size()-1));
-
-                if (dist1 < DIST) {
-                    left_point.push_back(cloud->points.at(i));
-                } else if (dist1 > 2) {
-                    double lx = left_point.at(0).x - left_point.at(left_point.size()-1).x;
-                    double ly = left_point.at(0).y - left_point.at(left_point.size()-1).y;
-
-                    double a = lx/ly;
-                    double b = -a*left_point.at(0).y + left_point.at(0).x;
-
-                    if (calcplaneDist(a, b, cloud->points.at(i)) > 1) right_point.push_back(cloud->points.at(i));
-                }
-            }
-        }
-    } */
     
     cout << right_point.size() << " " << left_point.size() << endl;
 
@@ -197,7 +167,7 @@ void scanCallback(const sensor_msgs::PointCloud2::ConstPtr &msg){
 	double right_yData[right_point.size()] = {0};
 
 	int left_result, right_result;
-
+	
 	for (int i=0;i<left_point.size();i++) {
 		left_xData[i] = left_point.at(i).x;
 		left_yData[i] = left_point.at(i).y;
