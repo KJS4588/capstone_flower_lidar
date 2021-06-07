@@ -21,13 +21,12 @@ void Capstone::wayCallback(const std_msgs::Float32MultiArray::ConstPtr &coef) {
 	}	
 	goal_point_ = makeGoalpoint(way_coef);
 	alpha_ = calcAngle(goal_point_);
-	angle_ = calcSteeringAngle(abs(alpha_)) * 180 / M_PI;
+	angle_ = calcSteeringAngle((alpha_)) * 180 / M_PI;
 
-	if (alpha_ > 0) angle_ = -angle_;
-	
-	cmd_.linear.x = 100;
-	cmd_.angular.z = angle_ * 150/20 + 1500;
-	if (cmd_.angular.z < 1350) cmd_.angular.z = 1350;
+ //	if (alpha_ > 0) angle_ = -angle_;
+	cmd_.linear.x = 95;
+	cmd_.angular.z = angle_ * 195/15 + 1555;
+	if (cmd_.angular.z < 1365) cmd_.angular.z = 1365;
 	if (cmd_.angular.z > 1750) cmd_.angular.z = 1750;
 	
 	cout << endl << "angle : " << angle_ << endl;

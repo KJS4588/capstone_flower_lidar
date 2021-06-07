@@ -63,6 +63,7 @@ void Converter::scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg) {
 
     sensor_msgs::PointCloud2 cloud;
 	projector_.transformLaserScanToPointCloud("/laser", scan, cloud, tfListener_);
+	
 	point_pub_.publish(cloud);
 
 }

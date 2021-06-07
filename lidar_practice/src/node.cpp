@@ -19,6 +19,8 @@
 
 #include "lidar_practice/polyfit.h"
 #include "lidar_practice/polyfit.c"
+
+#define ANGLE  2
 #define DIST   1
 #define _USE_MATH_DEFINES
 
@@ -77,14 +79,26 @@ void scanCallback(const sensor_msgs::PointCloud2::ConstPtr &msg){
     double ex_dist = 0.0;
     double dist1 = 0.0;
     double dist2 = 0.0;
-    
-    bool cnt = false;
+
+	bool cnt = false;
     bool left_;
     std_msgs::Float32MultiArray way_coef;
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::fromROSMsg(*msg, *cloud);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1 (new pcl::PointCloud<pcl::PointXYZ>);
+	
+	pcl::fromROSMsg(*msg, *cloud1);
 	cloud->header.frame_id = "laser";
 	
+	pcl::PointXYZ tmp_p;
+
+	for (size_t i=0;i<cloud1->points.size();i++) {
+		tmp_p.x = cloud1->points.at(i).x*cos(ANGLE*M_PI/180) + cloud1->points.at(i).y*sin(ANGLE*M_PI/180);
+		tmp_p.y = cloud1->points.at(i).y*cos(ANGLE*M_PI/180) - cloud1->points.at(i).x*sin(ANGLE*M_PI/180);
+		tmp_p.z = 0;
+
+		cloud->points.push_back(tmp_p);
+	}
+
 	vector<pcl::PointXYZ> left_point, right_point;
 	pcl::PassThrough<pcl::PointXYZ> pass;
 	

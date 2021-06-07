@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <ros.h>
 #include <geometry_msgs/Twist.h>
-#define STEER_CENTER 1500 // 0 deg
-#define STEER_MIN 1300 // -13 deg 
-#define STEER_MAX 1700 // +13 deg
+#define STEER_CENTER 1555 // 0 deg
+#define STEER_MIN 1360 // -13 deg 
+#define STEER_MAX 1750 // +13 deg
 
 #define SPEED_ZERO 1500
 #define SPEED_MIN 1250
