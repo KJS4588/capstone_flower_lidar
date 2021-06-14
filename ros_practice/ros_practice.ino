@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <ros.h>
 #include <geometry_msgs/Twist.h>
-#define STEER_CENTER 1500 // 0 deg
-#define STEER_MIN 1300 // -13 deg 
-#define STEER_MAX 1700 // +13 deg
+#define STEER_CENTER 1555 // 0 deg
+#define STEER_MIN 1360 // -13 deg 
+#define STEER_MAX 1750 // +13 deg
 
 #define SPEED_ZERO 1500
 #define SPEED_MIN 1250
@@ -17,7 +17,7 @@ ros::NodeHandle nh_;
 
 void cmd_cb(const geometry_msgs::Twist& cmd) {
 
-  dc_servo.writeMicroseconds(cmd.linear.x);
+  dc_servo.write(cmd.linear.x);
   steer_servo.writeMicroseconds(cmd.angular.z);
   printf("1");
 }
@@ -38,7 +38,7 @@ void loop() {
   if(Serial.available() > 0) { // tx_throttle_
     tx_steer_ = Serial.parseFloat();
     Serial.println(tx_steer_);
-    dc_servo.writeMicroseconds(tx_steer_);
+    steer_servo.writeMicroseconds(tx_steer_);
     }*/
   nh_.spinOnce();
   delay(100);

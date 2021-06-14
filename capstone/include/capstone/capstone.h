@@ -2,7 +2,6 @@
 #include "obstacle_detector/Obstacles.h"
 #include "obstacle_detector/SegmentObstacle.h"
 
-#include "std_msgs/Bool.h"
 #include "visualization_msgs/Marker.h"
 #include "geometry_msgs/Point.h"
 #include "geometry_msgs/Twist.h"
@@ -14,10 +13,8 @@
 #include "vector"
 #include "cmath"
 
-#define ORDER      3
 #define WHEEL_BASE 0.25 // cm
-#define LD         1.0    // m
-#define S_LD       0.5
+#define LD         0.8    // m
 #define WIDTH      2.1  // m
 #define THE        numeric_limits<float>::infinity()
 #define _USE_MATH_DEFINES
@@ -28,7 +25,7 @@ class Capstone{
 private:
 	ros::NodeHandle nh_;
 	ros::Subscriber scan_sub_, imu_sub_, coef_sub_;
-	ros::Publisher cmd_pub_, marker_pub_, state_pub_;
+	ros::Publisher cmd_pub_, marker_pub_;
 
 	vector<int> idx_;
 	float scan_data_[36] = {0};	
@@ -38,10 +35,9 @@ private:
 	double yaw_, left_temp_, right_temp_;
 		
 	int count_;
-	bool intersection_;
+
 	geometry_msgs::Point goal_point_;
 	geometry_msgs::Twist cmd_;
-	std_msgs::Bool state_;
 public:
 
 	void initSetup();
@@ -57,5 +53,5 @@ public:
 	double calcAngle(geometry_msgs::Point point);
 	double calcSteeringAngle(double alpha);
 
-	geometry_msgs::Point makeGoalpoint(double coef[ORDER+1]);
+	geometry_msgs::Point makeGoalpoint(double coef[3]);
 };

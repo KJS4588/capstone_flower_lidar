@@ -6,12 +6,11 @@ void Capstone::initSetup() {
 	coef_sub_ = nh_.subscribe("/coef", 10, &Capstone::wayCallback, this);
 	marker_pub_ = nh_.advertise<visualization_msgs::Marker>("waypoint", 10);
 	cmd_pub_ = nh_.advertise<geometry_msgs::Twist>("cmd", 10);
-	state_pub_ = nh_.advertise<std_msgs::Bool>("/state", 10);
-	
+
 	alpha_ = 0.0;
 	yaw_ = 0.0;
 	des_angle_ = 0.0;
-	intersection_ = false;
+
 }
 
 void Capstone::wayCallback(const std_msgs::Float32MultiArray::ConstPtr &coef) {
@@ -22,19 +21,14 @@ void Capstone::wayCallback(const std_msgs::Float32MultiArray::ConstPtr &coef) {
 	}	
 	goal_point_ = makeGoalpoint(way_coef);
 	alpha_ = calcAngle(goal_point_);
-	angle_ = calcSteeringAngle(abs(alpha_)) * 180 / M_PI;
+	angle_ = calcSteeringAngle((alpha_)) * 180 / M_PI;
 
-	if (alpha_ > 0) angle_ = -angle_;
-	
-	cmd_.linear.x = 1550;
-	cmd_.angular.z = angle_ * 150/20 + 1500;
-	if (cmd_.angular.z < 1350) cmd_.angular.z = 1350;
+ //	if (alpha_ > 0) angle_ = -angle_;
+	cmd_.linear.x = 95;
+	cmd_.angular.z = angle_ * 195/15 + 1555;
+	if (cmd_.angular.z < 1365) cmd_.angular.z = 1365;
 	if (cmd_.angular.z > 1750) cmd_.angular.z = 1750;
-	if (cmd_.angular.z > 1580) intersection_ = true;
 	
-	state_.data = intersection_;
-
-	state_pub_.publish(state_);
 	cout << endl << "angle : " << angle_ << endl;
 	cout << "cmd   : " << cmd_.angular.z << endl << endl;	
 	cmd_pub_.publish(cmd_);
@@ -118,17 +112,11 @@ double Capstone::calcAngle(geometry_msgs::Point point) {
 	return atan2(point.y, point.x); 
 }
 
-geometry_msgs::Point Capstone::makeGoalpoint(double coef[ORDER+1]) {
+geometry_msgs::Point Capstone::makeGoalpoint(double coef[3]) {
 	geometry_msgs::Point p;
-	if (!intersection_) {
-		p.y = coef[3]*LD*LD*LD + coef[2]*LD*LD + coef[1]*LD + coef[0];
-		p.x = LD;
-		p.z = 0;
-	}else {
-		p.y = coef[3]*S_LD*S_LD*S_LD + coef[2]*S_LD*S_LD + coef[1]*S_LD + coef[0];
-		p.x = S_LD;
-		p.z = 0;
-	}
+	p.y = coef[2]*LD*LD + coef[1]*LD + coef[0];
+	p.x = LD;
+	p.z = 0;
 
 	return p;
 }
