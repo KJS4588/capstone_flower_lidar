@@ -104,7 +104,7 @@ void scanCallback(const sensor_msgs::PointCloud2::ConstPtr &msg){
 	
 	pass.setInputCloud(cloud);
 	pass.setFilterFieldName("y");
-	pass.setFilterLimits(-10, 2.3);
+	pass.setFilterLimits(-10, 1.8);
 	pass.filter(*cloud);
 
 
@@ -225,13 +225,28 @@ void scanCallback(const sensor_msgs::PointCloud2::ConstPtr &msg){
 	left_result = polyfit(left_xData, left_yData, left_point.size(), ORDER, left_coef);
 	right_result = polyfit(right_xData, right_yData, right_point.size(), ORDER, right_coef);
     
-	//cout << left_coef[3] << "x^3 + " << left_coef[2] << "x^2 + " << left_coef[1] << "x + " << left_coef[0] << endl << endl;
-	//cout << right_coef[3] << "x^3 + " << right_coef[2] << "x^2 + " << right_coef[1] << "x + " << right_coef[0] << endl << endl;
-    
-    for (int i=0;i<ORDER+1;i++) {
-        waypoint_coef[i] = (left_coef[i] + right_coef[i])/2;       
-        way_coef.data.push_back(waypoint_coef[i]);
-    }
+	cout << "LEFT  : " << left_coef[2] << "x^2 + " << left_coef[1] << "x + " << left_coef[0] << endl << endl;
+	cout << "RIGHT : " << right_coef[2] << "x^2 + " << right_coef[1] << "x + " << right_coef[0] << endl << endl;
+    if (left_coef[2] > 0.5) {
+		for (int i=0;i<ORDER+1;i++) {
+			waypoint_coef[i] = -1000;       
+			way_coef.data.push_back(waypoint_coef[i]);
+		}
+	}
+/*	else if (left_coef[2] < -0.5) {
+		for (int i=0;i<ORDER+1;i++) {
+			waypoint_coef[i] = 1000;       
+			way_coef.data.push_back(waypoint_coef[i]);
+		}
+	}*/
+	else {
+		for (int i=0;i<ORDER+1;i++) {
+			waypoint_coef[i] = (left_coef[i] + right_coef[i])/2;       
+			way_coef.data.push_back(waypoint_coef[i]);
+		}
+	}
+
+	
 
     visualize(waypoint_coef);
     

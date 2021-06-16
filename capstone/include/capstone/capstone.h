@@ -13,8 +13,8 @@
 #include "vector"
 #include "cmath"
 
-#define WHEEL_BASE 0.25 // cm
-#define LD         0.8    // m
+#define WHEEL_BASE 0.257 // cm
+#define LD         0.85   // m
 #define WIDTH      2.1  // m
 #define THE        numeric_limits<float>::infinity()
 #define _USE_MATH_DEFINES

@@ -18,17 +18,35 @@ void Capstone::wayCallback(const std_msgs::Float32MultiArray::ConstPtr &coef) {
 
 	for (int i=0;i<3;i++) {
 		way_coef[i] = coef->data[i];
-	}	
-	goal_point_ = makeGoalpoint(way_coef);
-	alpha_ = calcAngle(goal_point_);
-	angle_ = calcSteeringAngle((alpha_)) * 180 / M_PI;
+	}
+	if (way_coef[2] == -1000 && way_coef[1] == -1000 && way_coef[0] == -1000) {
+		cmd_.angular.z = 1900;
+		cmd_.linear.x = 1520;
+	}
+	/*else if (way_coef[2] == 1000 && way_coef[1] == 1000 && way_coef[0] == 1000) {
+		cmd_.angular.z = 1200;
+		cmd_.linear.x = 1510;
+	}*/
+	else {
+		goal_point_ = makeGoalpoint(way_coef);
+		alpha_ = calcAngle(goal_point_);
+		angle_ = calcSteeringAngle((alpha_)) * 180 / M_PI;
 
- //	if (alpha_ > 0) angle_ = -angle_;
-	cmd_.linear.x = 95;
-	cmd_.angular.z = angle_ * 195/15 + 1555;
-	if (cmd_.angular.z < 1365) cmd_.angular.z = 1365;
-	if (cmd_.angular.z > 1750) cmd_.angular.z = 1750;
-	
+		cmd_.linear.x = 1550;
+		//cmd_.linear.x = 1540;
+		//cmd_.linear.x = 1550;
+		//cmd_.linear.x = 1560;
+		cmd_.angular.z = angle_ * 350/25 + 1550;
+		if (cmd_.angular.z < 1200) {
+			cmd_.angular.z = 1200;
+			cmd_.linear.x = 1530;
+		}
+		if (cmd_.angular.z > 1900) { 
+			cmd_.angular.z = 1900;
+		//	cmd_.linear.x = 1520;
+		
+		}
+	}
 	cout << endl << "angle : " << angle_ << endl;
 	cout << "cmd   : " << cmd_.angular.z << endl << endl;	
 	cmd_pub_.publish(cmd_);
